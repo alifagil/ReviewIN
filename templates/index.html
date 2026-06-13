@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReviewIN - AI Fraud Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="particles"></div>
+
+    <div id="mainWrapper" class="content-wrapper centered-content">
+        <div class="main-container">
+            <div class="brand-name">
+                Review<span class="brand-in"></span>
+            </div>
+            
+            <div class="input-box" id="inputBox">
+                <div id="scannerLine" class="scanner-line"></div>
+                
+                <form action="/analyze" method="POST" id="analyzeForm">
+                    <div class="input-type-container">
+                        <label class="radio-label">
+                            <input type="radio" name="input_type" value="link" {% if input_type != 'text' %}checked{% endif %}>
+                            Amazon Link
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="input_type" value="text" {% if input_type == 'text' %}checked{% endif %}>
+                            Manual Text
+                        </label>
+                    </div>
+
+                    <input type="text" name="url" id="targetInput" placeholder="Paste Amazon Product Link Here..." required value="{{ url if url else '' }}">
+                    <button type="submit" id="submitBtn">SCAN</button>
+                </form>
+
+                <div class="progress-wrapper" id="progressWrapper">
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p id="progressText">Initializing System...</p>
+                </div>
+            </div>
+
+            {% if percentage is defined %}
+            <div id="resultSection" class="result-section">
+                <div class="chart-card">
+                    <canvas id="myChart" data-percentage="{{ percentage }}" data-human="{{ human_percentage }}"></canvas>
+                    <div class="stats-center">
+                        <h1 class="percentage-num">0%</h1>
+                        <small>FRAUD SCORE</small>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; text-align: left; font-weight: 600; color: #00f2fe;">
+                     📊 Detected Reviews: {{ total_reviews }} item(s)
+                </div>
+
+                <div class="table-container" style="margin-top: 10px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Analysed Review</th>
+                                <th>Status</th>
+                                <th>Indications</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in results %}
+                            <tr>
+                                <td>"{{ res.text[:120] }}..."</td>
+                                <td class="status-cell" style="color: {{ '#ff073a' if res.label == 'BOT' else '#39ff14' }}">
+                                    {{ res.label }}
+                                </td>
+                                <td>{{ res.indications }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
